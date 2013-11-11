@@ -46,9 +46,9 @@ static void GICDistributorInit(GIC* gic)
 
 	uint16_t numIrqs = gic->distributor->TYPE & GIC_DIST_NUM_INT_MASK;
 	gic->numIrqs = (numIrqs + 1) * 32;
-
+#if 0
 	//configure all SPIs level triggered, active low
-	for(uint16_t i = 32; i < numIrqs; i += 16)
+	for(uint16_t i = 32; i < numIrqs; i += 16)//FIXME:numIrqs = 2! gic->numIrqs??
 		gic->distributor->INTERRUPT_CONFIG[i/16] = 0;
 
 	//configure all SPIs to be sent to this CPU only
@@ -66,13 +66,14 @@ static void GICDistributorInit(GIC* gic)
 	//disable all SPIs
 	for(uint16_t i = 32; i < numIrqs; i += 32)
 		gic->distributor->DISABLE[i/32] = 0xFFFFFFFF;
-
+#endif
 	//reenable the distributor
 	gic->distributor->CTRL = 1;
 }
 
 static void GICCPUInit(GIC* gic)
 {
+#if 0
 	//disable all PPI interrupts, enable all SGI interrupts
 	gic->distributor->DISABLE[0] = 0xFFFF0000;
 	gic->distributor->ENABLE[0] = 0x0000FFFF;
@@ -82,6 +83,7 @@ static void GICCPUInit(GIC* gic)
 		gic->distributor->PRIORITY[i/4] = 0xA0A0A0A0;
 
 	gic->cpu->PRIMASK = 0xF0;	//set priority mask for CPU interface
+#endif
 	gic->cpu->CTRL = 1;			//enable CPU interface, or with 8 if interrupts should be delivered as FIQ
 }
 

@@ -10,6 +10,9 @@
 
 #include <ps7_init.h>
 
+extern int rt_hw_interrupt_disable();
+extern rt_hw_interrupt_enable(int level);
+
 struct cpu_state* TimerHandler(struct cpu_state* state)
 {
 	printf("Tick\n");
@@ -20,8 +23,9 @@ struct cpu_state* TimerHandler(struct cpu_state* state)
 
 int main(int argc, char* agrv[]) {
 	//initialize DDR and MMIO
-	ps7_init();
-
+	//ps7_init();
+    int level;
+    level = rt_hw_interrupt_disable();
 	//Switch pin 7 to output
 	GPIO->DIRECTION_0 = GPIO->DIRECTION_0 | (1 << 7);
 
@@ -51,12 +55,20 @@ int main(int argc, char* agrv[]) {
 	PrivateTimerClearExpiration(PRIVATE_TIMER);
 	PrivateTimerStart(PRIVATE_TIMER);
 
-	//enable interrupts
-	CPUEnableInterrupts();
 	//CPUEnableFastInterrupts();
 
-	//uint32_t foo = 0;
+	//enable interrupts
+#if 0
+	CPUEnableInterrupts();
+#else
+    rt_hw_interrupt_enable(level);
+#endif
 
+#if 0
+	uint32_t foo = 0;
+    scanf("%d", &foo);
+    printf("foo=%d\n", foo);
+#endif
 	while(1)
 	{
 		/*if(PrivateTimerIsExpired(PRIVATE_TIMER))
